@@ -32,4 +32,9 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            archiveArtifacts artifacts: '**/*.txt', followSymlinks: false
+        }
+    }
 }
