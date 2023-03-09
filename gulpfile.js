@@ -4,8 +4,8 @@ var config = require("./config.json");
 var argv = require('yargs').argv;
 
 const { series } = require('gulp');
-  
-function getJobs(dataset, dir, callback){
+ /* This function gets a list of members from the dataset */ 
+function GetDSMembers(dataset, dir, callback){
     var command = `zowe files list am ${dataset} --rfj`;
     cmd.run(command, function(err, data, stderr) { 
       //log output
@@ -17,6 +17,7 @@ function getJobs(dataset, dir, callback){
       } else if (stderr){
         callback(new Error("\nCommand:\n" + command + "\n" + stderr + "Stack Trace:"));
       } else {
+        //return just the members
         var datasets = JSON.parse(data).data.apiResponse.items;
         callback(datasets);
       }
@@ -102,8 +103,7 @@ function defaultTask(callback) {
   } else if(argv.maxrc === undefined) {
     callback(new Error("Max Return Code not provided, use --maxrc <maxcode>"));
   } else {
-    getJobs(argv.ds, argv.dir, function(datasets){
-        var ds = datasets;
+    GetDSMembers(argv.ds, argv.dir, function(datasets){
         submitMultipleJobs(datasets, function(err) {
           if (err) {
             callback(err);
