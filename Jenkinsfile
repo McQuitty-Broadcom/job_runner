@@ -1,8 +1,8 @@
 pipeline {
-    agent { label 'zowe-agent' }
+    agent any
     environment {
         // z/OSMF Connection Details
-        ZOWE_OPT_HOST=credentials('eosHost')
+        ZOWE_OPT_HOST=mstrsvw.lvn.broadcom.net
     }
     stages {
         stage('local setup') {
@@ -10,6 +10,7 @@ pipeline {
                 sh 'node --version'
                 sh 'npm --version'
                 sh 'zowe --version'
+                sh 'npm install'
             }
         }
         stage('job1') {
@@ -27,18 +28,6 @@ pipeline {
                     sh 'gulp --ds mcqth01.jcl.ex2 --dir job2 --maxrc 4'
                 }
             }
-        }
-
-    post {
-        always {
-            publishHTML([allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'mochawesome-report',
-                reportFiles: 'mochawesome.html',
-                reportName: 'Test Results',
-                reportTitles: 'Test Report'
-                ])
         }
     }
 }
