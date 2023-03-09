@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         // z/OSMF Connection Details
-        ZOWE_OPT_HOST=mstrsvw.lvn.broadcom.net
+        ZOWE_OPT_HOST="mstrsvw.lvn.broadcom.net"
     }
     stages {
         stage('local setup') {
