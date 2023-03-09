@@ -10,7 +10,7 @@ pipeline {
                 bat 'node --version'
                 bat 'npm --version'
                 // bat 'npm install -g @zowe/cli'
-                bat 'npx zowe--version'
+                bat 'zowe--version'
                 bat 'npm install -g gulp-cli'
                 bat 'npm install'
             }
