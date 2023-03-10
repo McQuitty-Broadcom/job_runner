@@ -34,7 +34,9 @@ def submit_job(ds_name, output_dir, maxrc):
     command = "zowe jobs submit data-set {} -d {} --rfj".format(ds_name, output_dir)
     zowe_output = run_command(command)
     retcode = zowe_output['data']['retcode']
-    if int(retcode.split(" ")[1]) > maxrc:
+    if retcode.split(" ")[1] == "ERROR":
+        maxrc_exceeded = True
+    elif int(retcode.split(" ")[1]) > maxrc:
         maxrc_exceeded = True
     print(ds_name, retcode)
 
@@ -78,6 +80,6 @@ for job in data['jobs']:
     jobs_to_run = get_dataset_members(job['name'])
     submit_multiple_jobs(jobs_to_run, job["maxrc"])
     if maxrc_exceeded == True:
-        print("Job from {} Maxrc of {} has been exceeded".format(job["name"], job["maxrc"]))
+        print("Job from {} MaxRC of {} has been exceeded".format(job["name"], job["maxrc"]))
     
     
