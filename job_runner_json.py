@@ -74,6 +74,7 @@ try:
         data = json.load(json_file)
         print(data)
 except Exception as e:
+    print("File {} not found".format(args.jsonfile))
     exit(1)
 
 for job in data['jobs']:
