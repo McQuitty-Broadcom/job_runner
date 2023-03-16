@@ -7,11 +7,8 @@ pipeline {
     stages {
         stage('local setup') {
             steps {
-                bat 'node --version'
-                bat 'npm --version'
                 bat 'zowe --version'
                 bat 'python -m pip install argparge'
-                bat 'python -m pip install json'
             }
         }
         stage('set1') {
