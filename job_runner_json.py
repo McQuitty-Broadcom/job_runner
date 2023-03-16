@@ -31,6 +31,7 @@ def run_command(command):
 # submit the job, check for return code
 #
 def submit_job(ds_name, output_dir, maxrc):
+    global maxrc_exceeded
     command = "zowe jobs submit data-set {} -d {} --rfj".format(ds_name, output_dir)
     zowe_output = run_command(command)
     retcode = zowe_output['data']['retcode']

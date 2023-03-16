@@ -1,10 +1,14 @@
 {
     "jobs": [{
         "name" : "mcqth01.jcl.ex",
-        "maxrc" : 0
+        "maxrc": 0
     },
     {
         "name": "mcqth01.jcl.ex2",
+        "maxrc": 4
+    },
+    {
+        "name": "mcqth01.jcl.ex",
         "maxrc": 4
     }
 ]
