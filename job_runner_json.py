@@ -81,5 +81,6 @@ for job in data['jobs']:
     submit_multiple_jobs(jobs_to_run, job["maxrc"])
     if maxrc_exceeded == True:
         print("Job from {} MaxRC of {} has been exceeded".format(job["name"], job["maxrc"]))
+        exit(1)
     
     
