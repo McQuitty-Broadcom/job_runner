@@ -15,7 +15,7 @@ pipeline {
             steps {
                 //ZOWE_OPT_USERNAME & ZOWE_OPT_PASSWORD are used to interact with Endevor 
                 withCredentials([usernamePassword(credentialsId: 'eosCreds', usernameVariable: 'ZOWE_OPT_USER', passwordVariable: 'ZOWE_OPT_PASSWORD')]) {
-                    bat 'python job_runner_json --ds config.json -o python_jobs'
+                    bat 'python job_runner_json.py --ds config.json -o python_jobs'
                 }
             }
         }
