@@ -6,10 +6,6 @@
     {
         "name": "mcqth01.jcl.ex2",
         "maxrc": 4
-    },
-    {
-        "name" : "mcqth01.test.jcl",
-        "maxrc": 4
     }
 ]
 }
