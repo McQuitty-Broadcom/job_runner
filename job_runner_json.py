@@ -20,12 +20,12 @@ maxrc_exceeded = False
 def run_command(command):
     try:
         cmd = command.replace("zowe", zowe).split(" ")
-        out = json.loads(subprocess.check_output(cmd))
+        output = json.loads(subprocess.check_output(cmd))
     except Exception as e:
         print("Error executing command:" ," ".join(cmd), "\nOutput is below: \n")
         print(json.loads(e.output.decode("utf-8")))
         exit(1)
-    return out
+    return output
 
 #
 # submit the job, check for return code
@@ -55,9 +55,7 @@ def submit_multiple_jobs(jobs, maxrc):
 #
 def get_dataset_members(dataset):
     out = run_command("zowe files list am {} --rfj".format(dataset))
-    members = []
-    for member in out["data"]["apiResponse"]["items"]:
-        members.append("{}({})".format(dataset,member['member']))
+    members = ["{}({})".format(dataset, member['member']) for member in out["data"]["apiResponse"]["items"]]
     return members
 
 #
