@@ -16,6 +16,7 @@ zowe = "zowe" + zowe_extension
 maxrc_exceeded = False
 temp_dir = "tmp"
 dataset_extension = ".run"
+log_file = "logfile.txt"
 
 
 def dataset_exists(dataset):
@@ -78,6 +79,8 @@ def submit_job(ds_name, output_dir, maxrc):
         with open("resume_job", "a") as f:
             f.write(jobid)
         exit(8)
+    with open(log_file) as f:
+        f.write(ds_name, retcode)
     print(ds_name, retcode)
     del_dataset(ds_name)
 
