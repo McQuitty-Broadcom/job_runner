@@ -43,7 +43,7 @@ def run_command(command, bypass_error=False):
             return output
         print("Error executing command:" ," ".join(cmd), "\nOutput is below: \n")
         print(json.loads(e.output.decode("utf-8")))
-        exit(1)
+        exit(8)
     return output
 
 def copy_dataset(dataset):
@@ -72,12 +72,12 @@ def submit_job(ds_name, output_dir, maxrc):
         print("Error on {} Job {} Please address job and restart".format(ds_name.upper(), jobid))
         with open("resume_job", "a") as f:
             f.write(jobid)
-        exit(1)
+        exit(8)
     elif int(retcode.split(" ")[1]) > maxrc:
         print("{} Job {} return code was greater than {} so processing has stopped. Please address and restart job.".format(ds_name.upper(),jobid,maxrc))
         with open("resume_job", "a") as f:
             f.write(jobid)
-        exit(1)
+        exit(8)
     print(ds_name, retcode)
     del_dataset(ds_name)
 
@@ -116,7 +116,7 @@ try:
         #print(data)
 except Exception as e:
     print("File {} not found".format(args.jsonfile))
-    exit(1)
+    exit(8)
 print("Starting")
 for job in data['jobs']:
     #print("JOB:", job)
@@ -127,7 +127,7 @@ for job in data['jobs']:
         submit_multiple_jobs(jobs_to_run, job["maxrc"])
         if maxrc_exceeded == True:
             print("Job from {} MaxRC of {} has been exceeded".format(job["name"], job["maxrc"]))
-            exit(1)
+            exit(8)
         del_dataset(job_name)
 
 if exists("temp"):
