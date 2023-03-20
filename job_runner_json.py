@@ -70,17 +70,19 @@ def submit_job(ds_name, output_dir, maxrc):
     retcode = zowe_output['data']['retcode']
     jobid = zowe_output['data']['jobid']
     if retcode.split(" ")[1] == "ERROR":
-        print("Error on {} Job {} Please address job and restart".format(ds_name.upper(), jobid))
-        with open("resume_job", "a") as f:
-            f.write(jobid)
+        msg = "Error on {} Job {} Please address job and restart".format(ds_name.upper(), jobid)
+        print(msg)
+        with open(log_file, "a") as f:
+            f.write(msg)
         exit(8)
     elif int(retcode.split(" ")[1]) > maxrc:
-        print("{} Job {} return code was greater than {} so processing has stopped. Please address and restart job.".format(ds_name.upper(),jobid,maxrc))
-        with open("resume_job", "a") as f:
-            f.write(jobid)
+        msg = "{} Job {} return code was greater than {} so processing has stopped. Please address and restart job.".format(ds_name.upper(),jobid,maxrc)
+        print(msg)
+        with open(log_file, "a") as f:
+            f.write(msg)
         exit(8)
-    with open(log_file) as f:
-        f.write(ds_name, retcode)
+    with open(log_file, "a") as f:
+        f.write("{} {}\n".format(ds_name, retcode))
     print(ds_name, retcode)
     del_dataset(ds_name)
 
@@ -112,6 +114,10 @@ parser.add_argument("--js", "--json", help="Dataset for jobs", required=True, de
 parser.add_argument("-o","--output", help="Output directory", default="commands")
 args = parser.parse_args()
 
+if not exists(log_file):
+    with open(log_file, "w") as f:
+        f.write("\n")
+    
 data = []
 try:
     with open(args.jsonfile) as json_file:
