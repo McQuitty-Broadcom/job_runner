@@ -44,18 +44,10 @@ def run_command(command, bypass_error=False):
         exit(8)
     return output
 
-def copy_dataset(dataset):
-    create_cmd = f"zowe files create pds {dataset+dataset_extension} --rfj"
-    run_command(create_cmd)
-    source_cmd = f"zowe files download am {dataset} -d {temp_dir} --rfj"
-    run_command(source_cmd)
-    dest_command = f"zowe files upload dtp {temp_dir} {dataset+dataset_extension} --rfj"
-    run_command(dest_command)
-
 def del_dataset(dataset):
     cmd = f'zowe files delete ds "{dataset}" -f --rfj'
     run_command(cmd)
-    
+
 #
 # submit the job, check for return code
 #
@@ -97,8 +89,7 @@ def submit_multiple_jobs(jobs, maxrc):
 #
 def get_dataset_members(dataset):
     out = run_command(f"zowe files list am {dataset} --rfj")
-    members = [f"{dataset}({member['member']})" for member in out["data"]["apiResponse"]["items"]]
-    return members
+    return [f"{dataset}({member['member']})" for member in out["data"]["apiResponse"]["items"]]
 
 if not exists(log_file):
     with open(log_file, "w") as f:
@@ -111,6 +102,7 @@ parser.add_argument("--js", "--json", help="Dataset for jobs", required=True, de
 parser.add_argument("-o","--output", help="Output directory", default="commands")
 args = parser.parse_args()
 
+copy_dataset("mcqth01.jcl.ex3")
 data = []
 try:
     with open(args.jsonfile) as json_file:
