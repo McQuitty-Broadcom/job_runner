@@ -21,10 +21,8 @@ log_file = "logfile.txt"
 
 
 def dataset_exists(dataset):
-    #print("Exists:", dataset)
-    cmd = 'zowe files ls ds "{}" --rfj'.format(dataset)
+    cmd = f'zowe files ls ds "{dataset}" --rfj'
     output = run_command(cmd, bypass_error=True)
-    #print("CHECK OUT:", output)
     for ds in output['data']["apiResponse"]["items"]:
         if ds['dsname'] == dataset.upper():
             return True
@@ -35,9 +33,7 @@ def dataset_exists(dataset):
 # Output is in JSON format
 #
 def run_command(command, bypass_error=False):
-    #print("BYPASS:", bypass_error)
     try:
-        #print("CMD:", command)
         cmd = command.replace("zowe", zowe).split(" ")
         output = json.loads(subprocess.check_output(cmd))
     except Exception as e:
@@ -49,16 +45,15 @@ def run_command(command, bypass_error=False):
     return output
 
 def copy_dataset(dataset):
-    #print("COPY DATASET:", dataset)
-    create_cmd = "zowe files create pds {} --rfj".format(dataset+dataset_extension)
+    create_cmd = f"zowe files create pds {dataset+dataset_extension} --rfj"
     run_command(create_cmd)
-    source_cmd = "zowe files download am {} -d {} --rfj".format(dataset,temp_dir)
+    source_cmd = f"zowe files download am {dataset} -d {temp_dir} --rfj"
     run_command(source_cmd)
-    dest_command = "zowe files upload dtp {} {} --rfj".format(temp_dir, dataset+dataset_extension)
+    dest_command = f"zowe files upload dtp {temp_dir} {dataset+dataset_extension} --rfj"
     run_command(dest_command)
 
 def del_dataset(dataset):
-    cmd = 'zowe files delete ds "{}" -f --rfj'.format(dataset)
+    cmd = f'zowe files delete ds "{dataset}" -f --rfj'
     run_command(cmd)
     
 #
@@ -66,24 +61,24 @@ def del_dataset(dataset):
 #
 def submit_job(ds_name, output_dir, maxrc):
     global maxrc_exceeded
-    command = "zowe jobs submit data-set {} -d {} --rfj".format(ds_name, output_dir)
+    command = f"zowe jobs submit data-set {ds_name} -d {output_dir} --rfj"
     zowe_output = run_command(command)
     retcode = zowe_output['data']['retcode']
     jobid = zowe_output['data']['jobid']
     if retcode.split(" ")[1] == "ERROR":
-        msg = "Error on {} Job {} Please address job and restart".format(ds_name.upper(), jobid)
+        msg = f"Error on {ds_name.upper()} Job {jobid}. Please address job and restart"
         print(msg)
         with open(log_file, "a") as f:
             f.write(msg)
         exit(8)
     elif int(retcode.split(" ")[1]) > maxrc:
-        msg = "{} Job {} return code was greater than {} so processing has stopped. Please address and restart job.".format(ds_name.upper(),jobid,maxrc)
+        msg = f"{ds_name.upper()} Job {jobid} return code was greater than {maxrc} so processing has stopped. Please address and restart job."
         print(msg)
         with open(log_file, "a") as f:
             f.write(msg)
-        exit(8)
+        exit(int(retcode.split(" ")[1]))
     with open(log_file, "a") as f:
-        f.write("{} {}\n".format(ds_name, retcode))
+        f.write(f"{ds_name} {retcode}\n")
     print(ds_name, retcode)
     del_dataset(ds_name)
 
@@ -101,37 +96,33 @@ def submit_multiple_jobs(jobs, maxrc):
 # This can then be passed to submit multiple jobs
 #
 def get_dataset_members(dataset):
-    out = run_command("zowe files list am {} --rfj".format(dataset))
-    #print(out["data"]["apiResponse"]["items"])
-    members = ["{}({})".format(dataset, member['member']) for member in out["data"]["apiResponse"]["items"]]
-    #print("MEMBERS:", members)
+    out = run_command(f"zowe files list am {dataset} --rfj")
+    members = [f"{dataset}({member['member']})" for member in out["data"]["apiResponse"]["items"]]
     return members
-
-#
-# Get the arguments for the command
-#
-parser = argparse.ArgumentParser()
-parser.add_argument("--ds", "--datasets", help="Comma separated list Dataset for jobs", required=True, dest='datasets')
-parser.add_argument("-o","--output", help="Output directory", default="commands")
-args = parser.parse_args()
 
 if not exists(log_file):
     with open(log_file, "w") as f:
         f.write("\n")
 
-data = args.datasets.split(",")
+# Get the arguments for the command
+#
+parser = argparse.ArgumentParser()
+parser.add_argument("--js", "--json", help="Dataset for jobs", required=True, dest='jsonfile')
+parser.add_argument("-o","--output", help="Output directory", default="commands")
+args = parser.parse_args()
 
-for job in data:
-    if dataset_exists(job):
-        job_name = job
-        jobs_to_run = get_dataset_members(job_name)
-        submit_multiple_jobs(jobs_to_run, 0)
-        if maxrc_exceeded == True:
-            print("Job from {} MaxRC of {} has been exceeded".format(job["name"], job["maxrc"]))
-            exit(8)
-        del_dataset(job_name)
+data = []
+try:
+    with open(args.jsonfile) as json_file:
+        data = json.load(json_file)
+        print(data)
+except Exception as e:
+    print(f"File {args.jsonfile} not found")
+    exit(1)
 
-if exists("temp"):
-    shutil.rmtree("tmp")
+for job in data['jobs']:
+    jobs_to_run = get_dataset_members(job['name'])
+    submit_multiple_jobs(jobs_to_run, job["maxrc"])
+    if maxrc_exceeded == True:
+        print(f'Job from {job["name"]} MaxRC of {job["maxrc"]} has been exceeded')
 
-print("Complete")
